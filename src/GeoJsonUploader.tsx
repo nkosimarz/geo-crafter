@@ -5,20 +5,10 @@ interface GeoJsonUploaderProps {
   map: L.Map | null;
 }
 
-interface GeoJson {
-  type: string;
-  features: {
-    type: string;
-    geometry: {
-      type: string;
-      coordinates: number[][];
-    };
-    properties: { [key: string]: unknown };
-  }[];
-}
-
 const GeoJsonUploader: React.FC<GeoJsonUploaderProps> = ({ map }) => {
-  const [geoJsonData, setGeoJsonData] = useState<GeoJson | null>(null);
+  const [geoJsonData, setGeoJsonData] = useState<
+    GeoJSON.GeoJsonObject | GeoJSON.GeoJsonObject[] | null
+  >(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -43,15 +33,61 @@ const GeoJsonUploader: React.FC<GeoJsonUploaderProps> = ({ map }) => {
     }
   };
 
+  const handleSaveFile = () => {
+    if (geoJsonData) {
+      const blob = new Blob([JSON.stringify(geoJsonData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "geojson.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleRerenderMap = () => {
+    if (map && geoJsonData) {
+      map.eachLayer((layer) => {
+        if (layer instanceof L.GeoJSON) {
+          map.removeLayer(layer);
+        }
+      });
+      const geoJsonLayer = L.geoJSON(geoJsonData, {
+        style: (feature) => ({
+          color: feature?.properties?.color || "blue",
+          weight: feature?.properties?.weight || 3,
+        }),
+      }).addTo(map);
+      map.fitBounds(geoJsonLayer.getBounds());
+    }
+  };
+
   return (
     <div>
       <h2 style={{ textAlign: "left" }}>GeoJSON Uploader</h2>
       {geoJsonData && (
-        <pre style={{ textAlign: "left" }}>
+        <pre className="geojson-textbox">
           {JSON.stringify(geoJsonData, null, 2)}
         </pre>
       )}
-      <input type="file" accept=".geojson, .json" onChange={handleFileUpload} />
+
+      <div className="button-container">
+        <input
+          id="file-upload"
+          type="file"
+          accept=".geojson, .json"
+          onChange={handleFileUpload}
+          className="custom-file-upload"
+        />
+        <button className="custom-button" onClick={handleSaveFile}>
+          Save File
+        </button>
+        <button className="custom-button" onClick={handleRerenderMap}>
+          Rerender Map
+        </button>
+      </div>
     </div>
   );
 };

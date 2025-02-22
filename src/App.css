@@ -34,33 +34,57 @@
 }
 
 .container {
-  padding: 2em;
+  display: flex;
   height: 600px;
   aspect-ratio: 1.5;
   border-radius: 8px;
   background-color: aliceblue;
 }
 
-.read-the-docs {
-  color: #888;
-}
-
-.container {
-  display: flex;
-}
-
 .left-panel {
   width: 40%;
-  padding: 10px;
   border: 2px solid red;
   background-color: gray;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: flex-start;
+  flex: 1;
 }
 
 .right-panel {
   width: 60%;
   border: 2px solid red;
+}
+
+.geojson-textbox {
+  height: 50%;
+  width: 100%;
+  text-align: left;
+  overflow-y: auto;
+  border: 2px solid red;
+  box-sizing: border-box;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.custom-file-upload,
+.custom-button {
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.custom-file-upload:hover,
+.custom-button:hover {
+  background-color: #0056b3;
 }
