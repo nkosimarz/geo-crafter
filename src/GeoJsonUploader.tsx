@@ -91,7 +91,7 @@ const GeoJsonUploader: React.FC<GeoJsonUploaderProps> = ({ map }) => {
 
   return (
     <div>
-      <h2 className="heading">GeoJSON Uploader</h2>
+      <h2 className="heading">GeoCrafter</h2>
       {error ? (
         <div className="error">{error}</div>
       ) : (
