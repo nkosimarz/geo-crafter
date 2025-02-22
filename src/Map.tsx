@@ -10,7 +10,6 @@ const Map: React.FC = () => {
 
   useEffect(() => {
     if (mapRef.current && !mapInstanceRef.current) {
-      console.log("Initializing map...");
       const map = L.map(mapRef.current).setView([-33.91, 18.42], 12);
       mapInstanceRef.current = map;
       setMap(map);
@@ -20,19 +19,12 @@ const Map: React.FC = () => {
         attribution:
           '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
-
-      console.log("Map initialized:", map);
-    } else {
-      console.log(
-        "mapRef.current is null or mapInstanceRef.current is already initialized"
-      );
     }
 
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
-        console.log("Map instance removed");
       }
     };
   }, []);

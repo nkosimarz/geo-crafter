@@ -44,7 +44,6 @@
 
 .left-panel {
   width: 40%;
-  height: 580px;
   background-color: #073433;
   display: flex;
   flex-direction: column;
@@ -105,10 +104,8 @@
   text-align: left;
 }
 
+.heading,
 .help {
   text-align: left;
-}
-
-.heading {
-  text-align: left;
+  margin-bottom: 8px;
 }
