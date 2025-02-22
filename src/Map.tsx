@@ -15,11 +15,11 @@ const Map: React.FC = () => {
       mapInstanceRef.current = map;
       setMap(map);
 
-      // L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      //   maxZoom: 19,
-      //   attribution:
-      //     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      // }).addTo(map);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution:
+          '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
 
       console.log("Map initialized:", map);
     } else {

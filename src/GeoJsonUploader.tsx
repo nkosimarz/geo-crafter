@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import L from "leaflet";
 
 interface GeoJsonUploaderProps {
@@ -6,30 +6,60 @@ interface GeoJsonUploaderProps {
 }
 
 const GeoJsonUploader: React.FC<GeoJsonUploaderProps> = ({ map }) => {
-  const [geoJsonData, setGeoJsonData] = useState<
-    GeoJSON.GeoJsonObject | GeoJSON.GeoJsonObject[] | null
-  >(null);
+  const [geoJsonData, setGeoJsonData] = useState<GeoJSON.GeoJsonObject | null>(
+    null
+  );
+  const [geoJsonText, setGeoJsonText] = useState("");
+  const [error, setError] = useState("");
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  useEffect(() => {
+    if (geoJsonData) {
+      setGeoJsonText(JSON.stringify(geoJsonData, null, 2));
+    } else {
+      setGeoJsonText("");
+    }
+  }, [geoJsonData]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const geoJson = JSON.parse(text);
-        setGeoJsonData(geoJson);
+      reader.onload = (ev) => {
+        const text = ev.target?.result as string;
+        const parsed = JSON.parse(text);
+        setGeoJsonData(parsed);
+
         if (map) {
-          console.log("Adding GeoJSON to map:", geoJson);
-          const geoJsonLayer = L.geoJSON(geoJson, {
-            style: (feature) => ({
-              color: feature?.properties?.color || "blue",
-              weight: feature?.properties?.weight || 3,
-            }),
-          }).addTo(map);
-          map.fitBounds(geoJsonLayer.getBounds());
+          map.eachLayer((layer) => {
+            if (layer instanceof L.GeoJSON) {
+              map.removeLayer(layer);
+            }
+          });
+          const layer = L.geoJSON(parsed).addTo(map);
+          map.fitBounds(layer.getBounds());
         }
       };
       reader.readAsText(file);
+    }
+  };
+
+  const handleGeoJsonTextChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const newText = e.target.value;
+    setGeoJsonText(newText);
+    if (!newText) {
+      setError("");
+      setGeoJsonData(null);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(newText);
+      setGeoJsonData(parsed);
+      setError("");
+    } catch {
+      setError("Invalid JSON");
     }
   };
 
@@ -54,25 +84,25 @@ const GeoJsonUploader: React.FC<GeoJsonUploaderProps> = ({ map }) => {
           map.removeLayer(layer);
         }
       });
-      const geoJsonLayer = L.geoJSON(geoJsonData, {
-        style: (feature) => ({
-          color: feature?.properties?.color || "blue",
-          weight: feature?.properties?.weight || 3,
-        }),
-      }).addTo(map);
-      map.fitBounds(geoJsonLayer.getBounds());
+      const layer = L.geoJSON(geoJsonData).addTo(map);
+      map.fitBounds(layer.getBounds());
     }
   };
 
   return (
     <div>
-      <h2 style={{ textAlign: "left" }}>GeoJSON Uploader</h2>
-      {geoJsonData && (
-        <pre className="geojson-textbox">
-          {JSON.stringify(geoJsonData, null, 2)}
-        </pre>
+      <h2 className="heading">GeoJSON Uploader</h2>
+      {error ? (
+        <div className="error">{error}</div>
+      ) : (
+        <div className="help">Upload file to view or edit GeoJson</div>
       )}
-
+      <textarea
+        className="geojson-textbox"
+        value={geoJsonText}
+        onChange={handleGeoJsonTextChange}
+        spellCheck={false}
+      />
       <div className="button-container">
         <input
           id="file-upload"
@@ -81,7 +111,11 @@ const GeoJsonUploader: React.FC<GeoJsonUploaderProps> = ({ map }) => {
           onChange={handleFileUpload}
           className="custom-file-upload"
         />
-        <button className="custom-button" onClick={handleSaveFile}>
+        <button
+          className="custom-button"
+          onClick={handleSaveFile}
+          disabled={!geoJsonData || !!error}
+        >
           Save File
         </button>
         <button className="custom-button" onClick={handleRerenderMap}>
